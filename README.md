@@ -68,10 +68,6 @@ Type check:
 uv run mypy src
 ```
 
-## License
-
-[Your License Here]
-
 ## Author
 
 Chong Mun Seong
