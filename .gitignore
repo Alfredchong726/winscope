@@ -8,3 +8,13 @@ wheels/
 
 # Virtual environments
 .venv
+
+# External forensic tools (users should download themselves)
+tools/winpmem/*.exe
+tools/dumpit/*.exe
+tools/rawcopy/*.exe
+tools/npcap/*.exe
+
+# Keep only README files
+!tools/*/README.txt
+!tools/README.md
