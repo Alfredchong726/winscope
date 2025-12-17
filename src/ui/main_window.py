@@ -369,9 +369,54 @@ class MainWindow(QMainWindow):
         export_log_btn.clicked.connect(self._export_logs)
         log_buttons_layout.addWidget(export_log_btn)
 
+        view_detailed_log_btn = QPushButton("📄 View Detailed Log")
+        view_detailed_log_btn.clicked.connect(self._view_detailed_log)
+        log_buttons_layout.addWidget(view_detailed_log_btn)
+
         layout.addLayout(log_buttons_layout)
 
         return panel
+
+    def _view_detailed_log(self):
+        output_dir = Path(self.output_dir_input.text())
+
+        evidence_dirs = sorted(
+            [d for d in output_dir.iterdir() if d.is_dir() and d.name.startswith('Evidence_')],
+            key=lambda x: x.stat().st_mtime,
+            reverse=True
+        )
+
+        if not evidence_dirs:
+            QMessageBox.information(
+                self,
+                "No Logs",
+                "No evidence collections found"
+            )
+            return
+
+        latest_dir = evidence_dirs[0]
+
+        log_files = list(latest_dir.glob('*.log'))
+
+        if not log_files:
+            QMessageBox.information(
+                self,
+                "No Logs",
+                "No log files found in the latest collection"
+            )
+            return
+
+        log_file = log_files[0]
+
+        import subprocess
+        try:
+            subprocess.Popen(['notepad.exe', str(log_file)])
+        except Exception as e:
+            QMessageBox.critical(
+                self,
+                "Error",
+                f"Failed to open log file: {e}"
+            )
 
     def _create_action_bar(self) -> QWidget:
         action_bar = QFrame()

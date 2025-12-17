@@ -116,14 +116,26 @@ class CollectionThread(QThread):
 
     def _generate_report(self, completed: int, failed_modules: List[str]):
         try:
+            self.log_message.emit("Generating collection report...", "INFO")
+
             from src.services.report_generator import ReportGenerator
             import socket
             import platform
             import getpass
 
+            try:
+                hostname = socket.gethostname()
+            except:
+                hostname = "Unknown"
+
+            try:
+                ip_address = socket.gethostbyname(hostname)
+            except:
+                ip_address = "Unknown"
+
             collection_data = {
-                'hostname': socket.gethostname(),
-                'ip_address': socket.gethostbyname(socket.gethostname()),
+                'hostname': hostname,
+                'ip_address': ip_address,
                 'os_version': f"{platform.system()} {platform.release()}",
                 'user': getpass.getuser(),
                 'completed_modules': completed,
@@ -131,20 +143,33 @@ class CollectionThread(QThread):
                 'total_modules': len(self.modules)
             }
 
+            self.logger.debug(
+                f"Collection data prepared: {collection_data}",
+                module="CollectionThread"
+            )
+
             report_gen = ReportGenerator()
             report_path = report_gen.generate_report(
                 self.output_dir,
                 collection_data
             )
 
-            if report_path:
-                self.log_message.emit(f"Report generated: {report_path}", "SUCCESS")
+            if report_path and report_path.exists():
+                self.log_message.emit(f"Report generated: {report_path.name}", "SUCCESS")
+                self.logger.info(f"Report generated successfully: {report_path}")
             else:
                 self.log_message.emit("Failed to generate report", "ERROR")
+                self.logger.error("Report generation returned None or file not found")
+
+        except ImportError as e:
+            error_msg = f"Failed to import ReportGenerator: {e}"
+            self.logger.error(error_msg, module="CollectionThread", exc_info=True)
+            self.log_message.emit(error_msg, "ERROR")
 
         except Exception as e:
-            self.logger.error(f"Failed to generate report: {e}", exc_info=True)
-            self.log_message.emit(f"Failed to generate report: {e}", "ERROR")
+            error_msg = f"Failed to generate report: {e}"
+            self.logger.error(error_msg, module="CollectionThread", exc_info=True)
+            self.log_message.emit(error_msg, "ERROR")
 
     def _compress_evidence(self):
         try:
@@ -260,7 +285,7 @@ class EvidenceController:
             "filesystem": "src.modules.filesystem_module",
             "live_system": "src.modules.live_system_module",
             "browser": "src.modules.browser_module",
-            # "memory": "src.modules.memory_module",
+            "memory": "src.modules.memory_module",
             # "disk": "src.modules.disk_module",
             "registry": "src.modules.registry_module",
             "eventlogs": "src.modules.eventlogs_module",

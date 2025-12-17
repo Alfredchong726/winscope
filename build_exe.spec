@@ -1,17 +1,10 @@
 # -*- mode: python ; coding: utf-8 -*-
-"""
-PyInstaller配置文件
-用于构建 Evidence Collection Tool 的可执行文件
-"""
-
 import sys
 from pathlib import Path
 
-# 项目路径
 project_root = Path('.').absolute()
 src_path = project_root / 'src'
 
-# 收集所有Python文件
 block_cipher = None
 
 a = Analysis(
@@ -19,11 +12,9 @@ a = Analysis(
     pathex=[str(src_path)],
     binaries=[],
     datas=[
-        # 如果有图标或其他资源文件，在这里添加
-        # ('resources', 'resources'),
+        ('tools/README.md', 'tools'),
     ],
     hiddenimports=[
-        # 显式导入可能被忽略的模块
         'PyQt6.QtCore',
         'PyQt6.QtGui',
         'PyQt6.QtWidgets',
@@ -69,18 +60,18 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    name='EvidenceCollectionTool',  # 生成的EXE名称
+    name='EvidenceCollectionTool',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
     upx_exclude=[],
     runtime_tmpdir=None,
-    console=False,  # False = 窗口程序，True = 控制台程序
+    console=False,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='resources/icon.ico' if Path('resources/icon.ico').exists() else None,  # 图标路径
+    icon='resources/icon.ico' if Path('resources/icon.ico').exists() else None,
 )

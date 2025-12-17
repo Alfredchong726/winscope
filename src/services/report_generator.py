@@ -16,12 +16,38 @@ class ReportGenerator:
         collection_data: Dict[str, Any]
     ) -> Path:
         try:
+            self.logger.info(
+                f"Starting report generation for: {output_dir}",
+                module="ReportGenerator"
+            )
+
             report_path = output_dir / "collection_report.html"
 
+            if not output_dir.exists():
+                self.logger.error(
+                    f"Output directory does not exist: {output_dir}",
+                    module="ReportGenerator"
+                )
+                return None
+
+            self.logger.debug("Collecting evidence by module...", module="ReportGenerator")
             evidence_by_module = self._collect_evidence_by_module(output_dir)
 
+            if not evidence_by_module:
+                self.logger.warning(
+                    "No evidence found in modules",
+                    module="ReportGenerator"
+                )
+            else:
+                self.logger.info(
+                    f"Found evidence from {len(evidence_by_module)} module(s)",
+                    module="ReportGenerator"
+                )
+
+            self.logger.debug("Generating statistics...", module="ReportGenerator")
             statistics = self._generate_statistics(output_dir, evidence_by_module)
 
+            self.logger.debug("Generating HTML content...", module="ReportGenerator")
             html_content = self._generate_html(
                 output_dir,
                 collection_data,
@@ -29,10 +55,11 @@ class ReportGenerator:
                 statistics
             )
 
+            self.logger.debug(f"Writing report to: {report_path}", module="ReportGenerator")
             report_path.write_text(html_content, encoding='utf-8')
 
             self.logger.info(
-                f"Report generated: {report_path}",
+                f"Report generated successfully: {report_path}",
                 module="ReportGenerator"
             )
 
@@ -44,8 +71,106 @@ class ReportGenerator:
                 module="ReportGenerator",
                 exc_info=True
             )
+
+            try:
+                self._generate_fallback_report(output_dir, collection_data, str(e))
+            except:
+                pass
+
             return None
 
+    def _generate_fallback_report(
+        self,
+        output_dir: Path,
+        collection_data: Dict[str, Any],
+        error_message: str
+    ):
+        try:
+            report_path = output_dir / "collection_report_simple.html"
+
+            html = f"""
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <meta charset="UTF-8">
+                        <title>Evidence Collection Report (Simple)</title>
+                        <style>
+                            body {{
+                                font-family: Arial, sans-serif;
+                                background-color: #1a1b26;
+                                color: #c0caf5;
+                                padding: 20px;
+                            }}
+                            .container {{
+                                max-width: 1000px;
+                                margin: 0 auto;
+                                background-color: #24283b;
+                                padding: 30px;
+                                border-radius: 10px;
+                            }}
+                            h1 {{ color: #7aa2f7; }}
+                            h2 {{ color: #bb9af7; }}
+                            .error {{ color: #f7768e; }}
+                            .info {{ margin: 20px 0; }}
+                            .file-list {{
+                                background-color: #1a1b26;
+                                padding: 15px;
+                                border-radius: 5px;
+                                margin: 10px 0;
+                            }}
+                        </style>
+                    </head>
+                    <body>
+                        <div class="container">
+                            <h1>🔍 Evidence Collection Report</h1>
+                            <p class="error">Note: Full report generation encountered an error. This is a simplified report.</p>
+                            <p class="error">Error: {error_message}</p>
+
+                            <div class="info">
+                                <h2>Collection Information</h2>
+                                <p><strong>Hostname:</strong> {collection_data.get('hostname', 'Unknown')}</p>
+                                <p><strong>IP Address:</strong> {collection_data.get('ip_address', 'Unknown')}</p>
+                                <p><strong>User:</strong> {collection_data.get('user', 'Unknown')}</p>
+                                <p><strong>Generated:</strong> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
+                            </div>
+
+                            <div class="info">
+                                <h2>Collected Files</h2>
+                                <div class="file-list">
+                    """
+
+            for item in sorted(output_dir.rglob('*')):
+                if item.is_file() and item.suffix not in ['.html', '.log']:
+                    try:
+                        size_mb = item.stat().st_size / (1024 * 1024)
+                        rel_path = item.relative_to(output_dir)
+                        html += f"<p>{rel_path} ({size_mb:.2f} MB)</p>\n"
+                    except:
+                        pass
+
+            html += """
+                                </div>
+                            </div>
+
+                            <p style="margin-top: 30px; text-align: center; color: #9aa5ce;">
+                                Evidence Collection Tool v0.1.0
+                            </p>
+                        </div>
+                    </body>
+                    </html>
+                    """
+
+            report_path.write_text(html, encoding='utf-8')
+            self.logger.info(
+                f"Fallback report generated: {report_path}",
+                module="ReportGenerator"
+            )
+
+        except Exception as e:
+            self.logger.error(
+                f"Failed to generate fallback report: {e}",
+                module="ReportGenerator"
+            )
     def _collect_evidence_by_module(self, output_dir: Path) -> Dict[str, Any]:
         evidence = {}
 
@@ -772,7 +897,7 @@ class ReportGenerator:
                 </div>
 
                 <div class="file-list">
-"""
+                """
 
         if module_data['files']:
             html += f"""
@@ -787,7 +912,7 @@ class ReportGenerator:
                                 </tr>
                             </thead>
                             <tbody>
-"""
+                    """
             for file_info in module_data['files']:
                 html += f"""
                                 <tr>
@@ -795,12 +920,12 @@ class ReportGenerator:
                                     <td class="file-size">{file_info['size_mb']} MB</td>
                                     <td class="file-date">{file_info['modified']}</td>
                                 </tr>
-"""
+                        """
             html += """
                             </tbody>
                         </table>
                     </div>
-"""
+                    """
 
         for subdir_name, subdir_info in module_data['subdirs'].items():
             html += f"""
@@ -822,7 +947,7 @@ class ReportGenerator:
                                     </tr>
                                 </thead>
                                 <tbody>
-"""
+                    """
             for file_info in subdir_info['files'][:50]:
                 html += f"""
                                     <tr>
@@ -830,7 +955,7 @@ class ReportGenerator:
                                         <td class="file-size">{file_info['size_mb']} MB</td>
                                         <td class="file-date">{file_info['modified']}</td>
                                     </tr>
-"""
+                        """
 
             if len(subdir_info['files']) > 50:
                 html += f"""
@@ -839,16 +964,16 @@ class ReportGenerator:
                                             ... and {len(subdir_info['files']) - 50} more files
                                         </td>
                                     </tr>
-"""
+                        """
 
             html += """
                                 </tbody>
                             </table>
                         </div>
                     </div>
-"""
+                    """
             html += """
                         </div>
                     </div>
-"""
-            return html
+                    """
+        return html
