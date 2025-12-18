@@ -2,6 +2,7 @@ from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Callable, Optional
 import json
+import time
 
 from PyQt6.QtCore import QThread, pyqtSignal
 
@@ -174,27 +175,116 @@ class CollectionThread(QThread):
     def _compress_evidence(self):
         try:
             import zipfile
+            import os
 
-            compression_format = self.config.get("compression", {}).get("format", "zip")
+            if not self.config.get("compression", {}).get("enabled", True):
+                self.log_message.emit("Compression disabled", "INFO")
+                return
 
-            if compression_format == "zip":
-                archive_name = self.output_dir.parent / f"{self.output_dir.name}.zip"
+            self.log_message.emit("Preparing to compress evidence package...", "INFO")
 
-                with zipfile.ZipFile(archive_name, 'w', zipfile.ZIP_DEFLATED) as zipf:
-                    for file_path in self.output_dir.rglob('*'):
-                        if file_path.is_file():
-                            arcname = file_path.relative_to(self.output_dir.parent)
-                            zipf.write(file_path, arcname)
+            files_to_compress = []
+            total_size = 0
 
+            for root, dirs, files in os.walk(self.output_dir):
+                for file in files:
+                    file_path = Path(root) / file
+                    file_size = file_path.stat().st_size
+                    files_to_compress.append({
+                        'path': file_path,
+                        'size': file_size,
+                        'arcname': file_path.relative_to(self.output_dir.parent)
+                    })
+                    total_size += file_size
+
+            if not files_to_compress:
+                self.log_message.emit("No files to compress", "WARNING")
+                return
+
+            total_size_gb = total_size / (1024**3)
+            file_count = len(files_to_compress)
+
+            if total_size_gb > 10:
+                compress_level = 1
                 self.log_message.emit(
-                    f"Evidence compressed: {archive_name}",
-                    "SUCCESS"
+                    f"Large package detected ({total_size_gb:.2f} GB), using fast compression...",
+                    "INFO"
+                )
+            elif total_size_gb > 5:
+                compress_level = 3
+                self.log_message.emit(
+                    f"Compressing {file_count} files ({total_size_gb:.2f} GB) with balanced compression...",
+                    "INFO"
+                )
+            else:
+                compress_level = 6
+                self.log_message.emit(
+                    f"Compressing {file_count} files ({total_size_gb:.2f} GB)...",
+                    "INFO"
                 )
 
-        except Exception as e:
-            self.logger.error(f"Failed to compress evidence: {e}", exc_info=True)
-            self.log_message.emit(f"Failed to compress evidence: {e}", "ERROR")
+            archive_path = self.output_dir.parent / f"{self.output_dir.name}.zip"
 
+            compressed_size = 0
+            start_time = time.time()
+            last_update = start_time
+
+            with zipfile.ZipFile(archive_path, 'w', zipfile.ZIP_DEFLATED, compresslevel=compress_level) as zipf:
+                for i, file_info in enumerate(files_to_compress, 1):
+                    zipf.write(file_info['path'], file_info['arcname'])
+
+                    compressed_size += file_info['size']
+                    current_time = time.time()
+
+                    progress_percent = (compressed_size / total_size) * 100
+
+                    if (current_time - last_update >= 1.0) or (i == file_count):
+                        elapsed = current_time - start_time
+
+                        if elapsed > 0:
+                            speed_mbps = (compressed_size / (1024**2)) / elapsed
+                            remaining_bytes = total_size - compressed_size
+                            eta_seconds = remaining_bytes / (compressed_size / elapsed) if compressed_size > 0 else 0
+
+                            self.log_message.emit(
+                                f"Compressing: {progress_percent:.1f}% "
+                                f"({i}/{file_count} files) "
+                                f"[{speed_mbps:.1f} MB/s, ETA: {eta_seconds:.0f}s]",
+                                "INFO"
+                            )
+                        else:
+                            self.log_message.emit(
+                                f"Compressing: {progress_percent:.1f}% ({i}/{file_count} files)",
+                                "INFO"
+                            )
+
+                        last_update = current_time
+
+            archive_size = archive_path.stat().st_size
+            archive_size_gb = archive_size / (1024**3)
+            compression_ratio = (1 - archive_size / total_size) * 100
+            elapsed_total = time.time() - start_time
+            avg_speed = (total_size / (1024**2)) / elapsed_total if elapsed_total > 0 else 0
+
+            self.log_message.emit(
+                f"✓ Compression completed in {elapsed_total:.1f}s (avg: {avg_speed:.1f} MB/s)",
+                "SUCCESS"
+            )
+
+            self.log_message.emit(
+                f"Original: {total_size_gb:.2f} GB → Compressed: {archive_size_gb:.2f} GB "
+                f"({compression_ratio:.1f}% reduction)",
+                "SUCCESS"
+            )
+
+            self.log_message.emit(
+                f"Archive: {archive_path}",
+                "SUCCESS"
+            )
+
+        except Exception as e:
+            self.logger.error(f"Compression failed: {e}", exc_info=True)
+            self.log_message.emit(f"Compression failed: {e}", "ERROR")
 
 class EvidenceController:
     def __init__(self):
@@ -286,7 +376,7 @@ class EvidenceController:
             "live_system": "src.modules.live_system_module",
             "browser": "src.modules.browser_module",
             "memory": "src.modules.memory_module",
-            # "disk": "src.modules.disk_module",
+            "disk": "src.modules.disk_module",
             "registry": "src.modules.registry_module",
             "eventlogs": "src.modules.eventlogs_module",
         }

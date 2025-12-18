@@ -71,7 +71,6 @@ class MainWindow(QMainWindow):
         log_panel = self._create_log_panel()
         content_splitter.addWidget(log_panel)
 
-        # 设置初始比例 (1:1:1.5)
         content_splitter.setStretchFactor(0, 1)
         content_splitter.setStretchFactor(1, 1)
         content_splitter.setStretchFactor(2, 2)
@@ -1146,7 +1145,6 @@ class MainWindow(QMainWindow):
             )
 
     def _open_settings(self):
-        # TODO: 实现设置对话框
         QMessageBox.information(
             self,
             "Settings",

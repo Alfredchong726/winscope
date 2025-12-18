@@ -141,51 +141,51 @@ class NetworkModule(ICollectionModule):
         instruction_file = self.output_dir / "PACKET_CAPTURE_TOOLS.txt"
         with open(instruction_file, 'w', encoding='utf-8') as f:
             f.write("""
-                    ╔═══════════════════════════════════════════════════════════════════════╗
-                    ║           Packet Capture Tools Not Found                              ║
-                    ╚═══════════════════════════════════════════════════════════════════════╝
+╔═══════════════════════════════════════════════════════════════════════╗
+║           Packet Capture Tools Not Found                              ║
+╚═══════════════════════════════════════════════════════════════════════╝
 
-                    To enable network traffic capture in PCAP format, you need to install
-                    packet capture tools.
+To enable network traffic capture in PCAP format, you need to install
+packet capture tools.
 
-                    📥 Recommended: Wireshark (includes tshark and dumpcap)
-                    ----------------------------------------------------------------
-                    Download: https://www.wireshark.org/download.html
+📥 Recommended: Wireshark (includes tshark and dumpcap)
+----------------------------------------------------------------
+Download: https://www.wireshark.org/download.html
 
-                    Installation:
-                    1. Download Wireshark installer
-                    2. During installation, select:
-                    ✓ Wireshark
-                    ✓ TShark (command-line)
-                    ✓ Npcap (packet capture driver)
-                    3. Complete installation
-                    4. Restart WinScope
+Installation:
+1. Download Wireshark installer
+2. During installation, select:
+✓ Wireshark
+✓ TShark (command-line)
+✓ Npcap (packet capture driver)
+3. Complete installation
+4. Restart WinScope
 
-                    After installation, tshark will be available in PATH.
+After installation, tshark will be available in PATH.
 
-                    📋 Manual Packet Capture (Alternative):
-                    ----------------------------------------
-                    If you want to capture packets manually:
+📋 Manual Packet Capture (Alternative):
+----------------------------------------
+If you want to capture packets manually:
 
-                    1. Using Wireshark GUI:
-                    - Open Wireshark
-                    - Select network interface
-                    - Click "Start Capture"
-                    - Save as: network_traffic.pcapng
+1. Using Wireshark GUI:
+- Open Wireshark
+- Select network interface
+- Click "Start Capture"
+- Save as: network_traffic.pcapng
 
-                    2. Using tshark:
-                    tshark -i <interface> -w network_traffic.pcap -a duration:60
+2. Using tshark:
+tshark -i <interface> -w network_traffic.pcap -a duration:60
 
-                    3. Using tcpdump (if available):
-                    tcpdump -i <interface> -w network_traffic.pcap
+3. Using tcpdump (if available):
+tcpdump -i <interface> -w network_traffic.pcap
 
-                    Place the resulting .pcap/.pcapng file in this directory for analysis.
+Place the resulting .pcap/.pcapng file in this directory for analysis.
 
-                    🔍 Analyzing PCAP Files:
-                    -------------------------
-                    Wireshark: wireshark network_traffic.pcap
-                    Tshark: tshark -r network_traffic.pcap
-                    """)
+🔍 Analyzing PCAP Files:
+-------------------------
+Wireshark: wireshark network_traffic.pcap
+Tshark: tshark -r network_traffic.pcap
+""")
 
         self.collected_files.append(instruction_file)
         return False
@@ -456,115 +456,115 @@ class NetworkModule(ICollectionModule):
 
             with open(guide_file, 'w', encoding='utf-8') as f:
                 f.write("""
-                        ╔═══════════════════════════════════════════════════════════════════════╗
-                        ║              Wireshark Network Analysis Guide                         ║
-                        ╚═══════════════════════════════════════════════════════════════════════╝
+╔═══════════════════════════════════════════════════════════════════════╗
+║              Wireshark Network Analysis Guide                         ║
+╚═══════════════════════════════════════════════════════════════════════╝
 
-                        📊 Opening PCAP Files:
-                        ----------------------
-                        Wireshark:  wireshark network_traffic.pcapng
-                        Tshark:     tshark -r network_traffic.pcapng
+📊 Opening PCAP Files:
+----------------------
+Wireshark:  wireshark network_traffic.pcapng
+Tshark:     tshark -r network_traffic.pcapng
 
-                        🔍 Common Display Filters:
-                        ---------------------------
-                        # HTTP Traffic
-                        http
+🔍 Common Display Filters:
+---------------------------
+# HTTP Traffic
+http
 
-                        # HTTPS/TLS
-                        tls or ssl
+# HTTPS/TLS
+tls or ssl
 
-                        # DNS Queries
-                        dns
+# DNS Queries
+dns
 
-                        # Specific IP
-                        ip.addr == 192.168.1.100
+# Specific IP
+ip.addr == 192.168.1.100
 
-                        # Specific Port
-                        tcp.port == 80 or udp.port == 53
+# Specific Port
+tcp.port == 80 or udp.port == 53
 
-                        # SYN Scans (Port Scanning)
-                        tcp.flags.syn == 1 and tcp.flags.ack == 0
+# SYN Scans (Port Scanning)
+tcp.flags.syn == 1 and tcp.flags.ack == 0
 
-                        # Failed Connections
-                        tcp.flags.reset == 1
+# Failed Connections
+tcp.flags.reset == 1
 
-                        # Large Packets (>1000 bytes)
-                        frame.len > 1000
+# Large Packets (>1000 bytes)
+frame.len > 1000
 
-                        # Suspicious Protocols
-                        ftp or telnet or smtp
+# Suspicious Protocols
+ftp or telnet or smtp
 
-                        📋 Forensic Analysis Checklist:
-                        --------------------------------
-                        1. Identify Communication Patterns
-                        - Statistics > Conversations
-                        - Statistics > Endpoints
+📋 Forensic Analysis Checklist:
+--------------------------------
+1. Identify Communication Patterns
+- Statistics > Conversations
+- Statistics > Endpoints
 
-                        2. Extract HTTP Objects
-                        - File > Export Objects > HTTP
+2. Extract HTTP Objects
+- File > Export Objects > HTTP
 
-                        3. Follow TCP Streams
-                        - Right-click packet > Follow > TCP Stream
+3. Follow TCP Streams
+- Right-click packet > Follow > TCP Stream
 
-                        4. DNS Analysis
-                        - dns and (dns.flags.response == 0)  # Queries
-                        - dns.qry.name contains "suspicious"
+4. DNS Analysis
+- dns and (dns.flags.response == 0)  # Queries
+- dns.qry.name contains "suspicious"
 
-                        5. Detect Port Scans
-                        - tcp.flags.syn == 1 and tcp.flags.ack == 0
-                        - tcp.analysis.flags
+5. Detect Port Scans
+- tcp.flags.syn == 1 and tcp.flags.ack == 0
+- tcp.analysis.flags
 
-                        6. Find Data Exfiltration
-                        - Large uploads: tcp.len > 1000 and ip.src == [internal_ip]
-                        - FTP file transfers: ftp-data
-                        - HTTP POST: http.request.method == "POST"
+6. Find Data Exfiltration
+- Large uploads: tcp.len > 1000 and ip.src == [internal_ip]
+- FTP file transfers: ftp-data
+- HTTP POST: http.request.method == "POST"
 
-                        7. Identify Malware C2
-                        - Beaconing: regular intervals in conversations
-                        - Non-standard ports: tcp.port != 80 and tcp.port != 443
+7. Identify Malware C2
+- Beaconing: regular intervals in conversations
+- Non-standard ports: tcp.port != 80 and tcp.port != 443
 
-                        🛠️ Tshark Commands:
-                        --------------------
-                        # Extract HTTP requests
-                        tshark -r network_traffic.pcapng -Y "http.request" -T fields -e http.request.method -e http.host -e http.request.uri
+🛠️ Tshark Commands:
+--------------------
+# Extract HTTP requests
+tshark -r network_traffic.pcapng -Y "http.request" -T fields -e http.request.method -e http.host -e http.request.uri
 
-                        # Count packets by protocol
-                        tshark -r network_traffic.pcapng -q -z io,phs
+# Count packets by protocol
+tshark -r network_traffic.pcapng -q -z io,phs
 
-                        # Extract DNS queries
-                        tshark -r network_traffic.pcapng -Y "dns.flags.response == 0" -T fields -e dns.qry.name
+# Extract DNS queries
+tshark -r network_traffic.pcapng -Y "dns.flags.response == 0" -T fields -e dns.qry.name
 
-                        # Statistics summary
-                        tshark -r network_traffic.pcapng -q -z conv,tcp
+# Statistics summary
+tshark -r network_traffic.pcapng -q -z conv,tcp
 
-                        # Export HTTP objects
-                        tshark -r network_traffic.pcapng --export-objects http,./http_objects/
+# Export HTTP objects
+tshark -r network_traffic.pcapng --export-objects http,./http_objects/
 
-                        🔗 Integration with Other Tools:
-                        ---------------------------------
-                        NetworkMiner: NetworkMiner.exe network_traffic.pcapng
-                        - Extract files, credentials, hostnames
+🔗 Integration with Other Tools:
+---------------------------------
+NetworkMiner: NetworkMiner.exe network_traffic.pcapng
+- Extract files, credentials, hostnames
 
-                        Zeek (Bro): zeek -r network_traffic.pcapng
-                        - Generate detailed logs
+Zeek (Bro): zeek -r network_traffic.pcapng
+- Generate detailed logs
 
-                        Snort: snort -r network_traffic.pcapng -c snort.conf
-                        - IDS analysis
+Snort: snort -r network_traffic.pcapng -c snort.conf
+- IDS analysis
 
-                        📚 Resources:
-                        -------------
-                        - Wireshark User Guide: https://www.wireshark.org/docs/wsug_html/
-                        - Display Filter Reference: https://www.wireshark.org/docs/dfref/
-                        - Wireshark Tutorial: https://www.wireshark.org/docs/
+📚 Resources:
+-------------
+- Wireshark User Guide: https://www.wireshark.org/docs/wsug_html/
+- Display Filter Reference: https://www.wireshark.org/docs/dfref/
+- Wireshark Tutorial: https://www.wireshark.org/docs/
 
-                        ⚠️  Analysis Tips:
-                        ------------------
-                        - Look for anomalies in normal traffic patterns
-                        - Check for connections to suspicious IPs/domains
-                        - Analyze timing patterns for beaconing
-                        - Extract and analyze transferred files
-                        - Correlate with other evidence (process list, timestamps)
-                        """)
+⚠️  Analysis Tips:
+------------------
+- Look for anomalies in normal traffic patterns
+- Check for connections to suspicious IPs/domains
+- Analyze timing patterns for beaconing
+- Extract and analyze transferred files
+- Correlate with other evidence (process list, timestamps)
+""")
 
             self.collected_files.append(guide_file)
 
