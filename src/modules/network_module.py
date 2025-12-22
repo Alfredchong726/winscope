@@ -440,7 +440,6 @@ Tshark: tshark -r network_traffic.pcap
 
                 interfaces[interface_name] = interface_info
 
-            # 保存为JSON
             with open(output_file, 'w', encoding='utf-8') as f:
                 json.dump(interfaces, f, indent=4, ensure_ascii=False)
 

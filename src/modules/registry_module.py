@@ -263,7 +263,6 @@ class RegistryModule(ICollectionModule):
                 f.write("Registry Collection Report\n")
                 f.write("=" * 80 + "\n\n")
 
-                # 统计信息
                 f.write("Collection Summary:\n")
                 f.write("-" * 80 + "\n")
 

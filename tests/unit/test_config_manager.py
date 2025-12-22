@@ -97,7 +97,6 @@ class TestConfigManager:
 
         config.set("output_directory", "D:/Modified")
 
-        # Reset
         config.reset_to_defaults()
 
         default_dir = config.get("output_directory")

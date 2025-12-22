@@ -10,7 +10,6 @@ class TestHashCalculator:
     def setup_method(self):
         self.temp_dir = Path(tempfile.mkdtemp())
         self.test_file = self.temp_dir / "test.txt"
-        # Create a test file with known content
         self.test_file.write_text("Hello, World!")
 
     def teardown_method(self):
@@ -21,7 +20,6 @@ class TestHashCalculator:
         calc = HashCalculator()
         hashes = calc.calculate_file_hashes(self.test_file, ['md5'])
 
-        # Known MD5 of "Hello, World!"
         expected_md5 = "65a8e27d8879283831b664bd8b7f0ad4"
         assert hashes['md5'] == expected_md5
 

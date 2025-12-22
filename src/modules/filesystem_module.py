@@ -111,10 +111,8 @@ class FilesystemModule(ICollectionModule):
                                 item.stat().st_mtime
                             ).strftime('%Y-%m-%d %H:%M:%S')
 
-                            # 尝试读取快捷方式目标（.lnk文件）
                             target = "N/A"
                             if item.suffix.lower() == '.lnk':
-                                # 简单处理，实际.lnk解析更复杂
                                 target = "Shortcut file"
 
                             f.write(f"{item.name:<50} {modified:<20} {target:<50}\n")

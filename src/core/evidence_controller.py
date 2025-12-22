@@ -59,7 +59,6 @@ class CollectionThread(QThread):
                 )
                 self.module_started.emit(module_info.get("id", "unknown"))
 
-                # 初始化模块
                 if not module.initialize():
                     self.log_message.emit(
                         f"Failed to initialize module: {module_name}",

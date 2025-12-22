@@ -78,7 +78,6 @@ class BodyFileFormat:
         uid = "0"
         gid = "0"
 
-        # Size
         size = str(file_meta.file_size)
 
         def to_timestamp(dt: Optional[datetime]) -> str:

@@ -21,14 +21,12 @@ class ModuleCard(QFrame):
         self.setObjectName("card")
         self.setFrameShape(QFrame.Shape.StyledPanel)
 
-        # Main layout
         layout = QVBoxLayout(self)
         layout.setContentsMargins(12, 12, 12, 12)
         layout.setSpacing(8)
 
         header_layout = QHBoxLayout()
 
-        # Icon
         icon_label = QLabel(self.module_info.icon)
         icon_font = QFont()
         icon_font.setPointSize(20)

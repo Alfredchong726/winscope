@@ -184,7 +184,6 @@ class ConfigManager:
                 "config": self.config.copy()
             }
 
-            # Save profiles
             with open(self.profiles_file, 'w', encoding='utf-8') as f:
                 json.dump(profiles, f, indent=4, ensure_ascii=False)
 

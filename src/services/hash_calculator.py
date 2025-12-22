@@ -69,7 +69,6 @@ class HashCalculator:
                     if progress_callback and file_size > 0:
                         progress_callback(bytes_processed, file_size)
 
-            # Get hex digests
             result = {alg: hash_obj.hexdigest() for alg, hash_obj in hash_objects.items()}
 
             self.logger.debug(

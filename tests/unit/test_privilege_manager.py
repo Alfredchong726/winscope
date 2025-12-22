@@ -7,7 +7,6 @@ class TestPrivilegeManager:
     def test_is_admin_check(self):
         pm = PrivilegeManager()
 
-        # Should return a boolean
         is_admin = pm.is_admin()
         assert isinstance(is_admin, bool)
 
