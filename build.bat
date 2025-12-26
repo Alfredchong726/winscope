@@ -1,42 +1,51 @@
 @echo off
-REM 构建 Evidence Collection Tool 可执行文件
-
 echo ========================================
-echo Building Evidence Collection Tool
+echo  Building WinScope Executable
 echo ========================================
 echo.
 
-REM 激活虚拟环境
-call .venv\Scripts\activate.bat
-
-REM 清理旧的构建文件
-echo Cleaning old build files...
+echo [1/5] Cleaning old build files...
 if exist build rmdir /s /q build
 if exist dist rmdir /s /q dist
-
-REM 使用PyInstaller构建
+echo      Done.
 echo.
-echo Building executable...
-pyinstaller build_exe.spec --clean
 
-REM 检查是否成功
-if exist dist\EvidenceCollectionTool.exe (
-    echo.
-    echo ========================================
-    echo Build successful!
-    echo ========================================
-    echo.
-    echo Executable location: dist\EvidenceCollectionTool.exe
-    echo.
-
-    REM 显示文件信息
-    dir dist\EvidenceCollectionTool.exe
+echo [2/5] Checking for WinPmem...
+if exist tools\winpmem\winpmem.exe (
+    echo      ✓ WinPmem found
 ) else (
-    echo.
-    echo ========================================
-    echo Build failed!
-    echo ========================================
-    echo.
+    echo      ⚠ WinPmem not found - will generate instructions at runtime
 )
+echo.
 
+echo [3/5] Checking PyInstaller...
+uv pip show pyinstaller >nul 2>&1
+if errorlevel 1 (
+    echo      Installing PyInstaller...
+    uv pip install pyinstaller
+) else (
+    echo      ✓ PyInstaller already installed
+)
+echo.
+
+echo [4/5] Building executable...
+pyinstaller winscope.spec
+if errorlevel 1 (
+    echo      ✗ Build failed!
+    pause
+    exit /b 1
+)
+echo      ✓ Build successful
+echo.
+
+echo [5/5] Build complete!
+echo.
+echo ========================================
+echo  Output Location
+echo ========================================
+echo.
+dir dist\WinScope.exe
+echo.
+echo To run: dist\WinScope.exe
+echo.
 pause
