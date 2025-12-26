@@ -46,7 +46,7 @@ class MainWindow(QMainWindow):
         self.logger.info("Main window initialized", module="MainWindow")
 
     def setup_ui(self):
-        self.setWindowTitle("Centralized Evidence Collection Tool")
+        self.setWindowTitle("WinScope")
         self.setGeometry(100, 100, 1400, 900)
 
         central_widget = QWidget()
@@ -71,7 +71,7 @@ class MainWindow(QMainWindow):
         log_panel = self._create_log_panel()
         content_splitter.addWidget(log_panel)
 
-        content_splitter.setStretchFactor(0, 1)
+        content_splitter.setStretchFactor(0, 3)
         content_splitter.setStretchFactor(1, 1)
         content_splitter.setStretchFactor(2, 2)
 
@@ -120,7 +120,7 @@ class MainWindow(QMainWindow):
         panel = QFrame()
         panel.setObjectName("sidebar")
         panel.setMinimumWidth(320)
-        panel.setMaximumWidth(400)
+        panel.setMaximumWidth(580)
 
         layout = QVBoxLayout(panel)
         layout.setContentsMargins(12, 12, 12, 12)
