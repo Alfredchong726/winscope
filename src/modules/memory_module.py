@@ -300,20 +300,23 @@ class MemoryModule(ICollectionModule):
             self.logger.error(f"Failed to create error report: {e}", module="MemoryModule")
 
     def _acquire_memory(self) -> Optional[Path]:
+        from datetime import datetime
+        import sys
+
         output_file = self.output_dir / f"memory_{datetime.now().strftime('%Y%m%d_%H%M%S')}.raw"
 
         try:
-            project_root = Path(__file__).parent.parent.parent
-            winpmem_path = project_root / "tools" / "winpmem" / "winpmem.exe"
+            if getattr(sys, 'frozen', False):
+                application_path = Path(sys._MEIPASS)
+            else:
+                application_path = Path(__file__).parent.parent.parent
 
-            self.logger.info(f"Looking for WinPmem at: {winpmem_path}", module="MemoryModule")
+            winpmem_path = application_path / "tools" / "winpmem" / "winpmem.exe"
 
-            if not winpmem_path.exists():
-                self.logger.warning(f"WinPmem not found at: {winpmem_path}", module="MemoryModule")
-                self._create_instruction_file(winpmem_path)
-                return None
-
-            self.logger.info("Detecting WinPmem version...", module="MemoryModule")
+            self.logger.info(
+                f"Looking for WinPmem at: {winpmem_path}",
+                module="MemoryModule"
+            )
 
             try:
                 version_result = subprocess.run(
