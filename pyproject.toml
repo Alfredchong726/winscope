@@ -88,4 +88,5 @@ ignore_missing_imports = true
 [dependency-groups]
 dev = [
     "pyinstaller>=6.17.0",
+    "python-docx>=1.2.0",
 ]

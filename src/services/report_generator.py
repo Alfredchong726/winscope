@@ -175,6 +175,20 @@ class ReportGenerator:
         evidence = {}
 
         modules_config = {
+            'memory': {
+                'name': 'Memory Acquisition',
+                'icon': '🧠',
+                'files': ['system_info.json', 'hashes.txt'],
+                'special_files': ['volatility_guide.txt', 'acquisition_metadata.json'],
+                'patterns': ['*.raw', '*.dmp', '*.mem']
+            },
+            'disk': {
+                'name': 'Disk Acquisition',
+                'icon': '💽',
+                'files': ['disk_information.json', 'hashes.txt'],
+                'subdirs': ['logical_acquisition'],
+                'special_files': ['autopsy_guide.txt', 'imaging_instructions.txt']
+            },
             'network': {
                 'name': 'Network Collection',
                 'icon': '🌐',
@@ -237,6 +251,15 @@ class ReportGenerator:
                         module_evidence['total_size'] += file_info['size']
                         module_evidence['file_count'] += 1
 
+            if 'patterns' in config:
+                for pattern in config['patterns']:
+                    for file_path in module_dir.glob(pattern):
+                        if file_path.is_file():
+                            file_info = self._get_file_info(file_path)
+                            module_evidence['files'].append(file_info)
+                            module_evidence['total_size'] += file_info['size']
+                            module_evidence['file_count'] += 1
+
             if 'subdirs' in config:
                 for subdir_name in config['subdirs']:
                     subdir_path = module_dir / subdir_name
@@ -269,11 +292,23 @@ class ReportGenerator:
     def _get_file_info(self, file_path: Path) -> Dict[str, Any]:
         try:
             stat = file_path.stat()
+            size_bytes = stat.st_size
+
+            if size_bytes < 1024:
+                size_str = f"{size_bytes} B"
+            elif size_bytes < 1024 * 1024:
+                size_str = f"{size_bytes / 1024:.2f} KB"
+            elif size_bytes < 1024 * 1024 * 1024:
+                size_str = f"{size_bytes / (1024 * 1024):.2f} MB"
+            else:
+                size_str = f"{size_bytes / (1024 * 1024 * 1024):.2f} GB"
+
             return {
                 'name': file_path.name,
                 'path': str(file_path),
                 'size': stat.st_size,
                 'size_mb': round(stat.st_size / (1024 * 1024), 2),
+                'size_str': size_str,
                 'modified': datetime.fromtimestamp(stat.st_mtime).strftime('%Y-%m-%d %H:%M:%S'),
                 'extension': file_path.suffix
             }
@@ -283,6 +318,7 @@ class ReportGenerator:
                 'path': str(file_path),
                 'size': 0,
                 'size_mb': 0,
+                'size_str': '0 B',
                 'modified': 'N/A',
                 'extension': ''
             }
