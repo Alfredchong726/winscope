@@ -16,22 +16,16 @@ else:
 
 readme_files = [
     'README.md',
-    'LICENSE',
     'tools/README.md',
 ]
 
 for readme in readme_files:
     readme_path = project_root / readme
     if readme_path.exists():
-        datas.append((str(readme_path), str(Path(readme).parent) if Path(readme).parent != Path('.') else '.'))
-
-config_template = project_root / 'config.json.template'
-if config_template.exists():
-    datas.append((str(config_template), '.'))
+        parent = str(Path(readme).parent) if Path(readme).parent != Path('.') else '.'
+        datas.append((str(readme_path), parent))
 
 print(f"\n📦 Data files to include: {len(datas)} items")
-
-block_cipher = None
 
 a = Analysis(
     ['src/main.py'],
@@ -42,7 +36,6 @@ a = Analysis(
         'PyQt6.QtCore',
         'PyQt6.QtGui',
         'PyQt6.QtWidgets',
-
         'json',
         'csv',
         'pathlib',
@@ -51,7 +44,12 @@ a = Analysis(
         'hashlib',
         'zipfile',
         'sqlite3',
+        'datetime',
+        'time',
+        'enum',
+        'abc',
         'psutil',
+        'src.modules.base_module',
         'src.modules.memory_module',
         'src.modules.network_module',
         'src.modules.disk_module',
@@ -63,6 +61,13 @@ a = Analysis(
         'src.services.logger',
         'src.services.hash_calculator',
         'src.services.config_manager',
+        'src.services.privilege_manager',
+        'src.services.report_generator',
+        'src.core.evidence_controller',
+        'src.ui.main_window',
+        'src.ui.widgets',
+        'src.ui.module_info',
+        'src.ui.styles',
     ],
     hookspath=[],
     hooksconfig={},
@@ -74,6 +79,12 @@ a = Analysis(
         'scipy',
         'PIL',
         'tkinter',
+        'unittest',
+        'test',
+        'xml',
+        'email',
+        'http',
+        'urllib',
     ],
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
@@ -107,9 +118,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='resources/icon.ico',
-
-    version='version_info.txt',
+    icon=None,
     uac_admin=True,
     uac_uiaccess=False,
 )
@@ -118,6 +127,6 @@ print("\n" + "="*70)
 print("✓ PyInstaller configuration complete")
 print("="*70)
 print(f"Output: dist/WinScope.exe")
-print(f"Console: {'No' if not console else 'Yes'}")
-print(f"Admin privileges: {'Required' if uac_admin else 'Optional'}")
+print(f"Console: No (GUI Application)")
+print(f"Admin privileges: Required")
 print("="*70 + "\n")

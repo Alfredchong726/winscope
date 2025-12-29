@@ -1,6 +1,6 @@
 @echo off
 echo ========================================
-echo  Building WinScope Executable
+echo  Building WinScope v0.2.0
 echo ========================================
 echo.
 
@@ -29,6 +29,7 @@ if errorlevel 1 (
 echo.
 
 echo [4/5] Building executable...
+echo      This may take 2-3 minutes...
 pyinstaller winscope.spec
 if errorlevel 1 (
     echo      ✗ Build failed!
