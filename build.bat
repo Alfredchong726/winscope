@@ -4,6 +4,8 @@ echo  Building WinScope v0.2.0
 echo ========================================
 echo.
 
+call .venv\Scripts\activate.bat
+
 echo [1/5] Cleaning old build files...
 if exist build rmdir /s /q build
 if exist dist rmdir /s /q dist
