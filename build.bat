@@ -16,7 +16,7 @@ echo [2/5] Checking for WinPmem...
 if exist tools\winpmem\winpmem.exe (
     echo      ✓ WinPmem found
 ) else (
-    echo      ⚠ WinPmem not found - will generate instructions at runtime
+    echo      ⚠ WinPmem not found - application will generate download instructions
 )
 echo.
 
@@ -31,7 +31,6 @@ if errorlevel 1 (
 echo.
 
 echo [4/5] Building executable...
-echo      This may take 2-3 minutes...
 pyinstaller build_exe.spec
 if errorlevel 1 (
     echo      ✗ Build failed!
@@ -49,6 +48,12 @@ echo ========================================
 echo.
 dir dist\WinScope.exe
 echo.
-echo To run: dist\WinScope.exe
+echo Output: dist\WinScope.exe
+echo.
+echo ========================================
+echo  Next Steps
+echo ========================================
+echo 1. Test the executable: dist\WinScope.exe
+echo 2. Create release package: release-package.bat
 echo.
 pause

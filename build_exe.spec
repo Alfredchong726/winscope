@@ -1,4 +1,5 @@
 # -*- mode: python ; coding: utf-8 -*-
+
 import os
 from pathlib import Path
 
@@ -11,21 +12,24 @@ if winpmem_path.exists():
     datas.append((str(winpmem_path), 'tools/winpmem'))
     print(f"✓ Found WinPmem: {winpmem_path}")
 else:
-    print(f"⚠ WinPmem not found at: {winpmem_path}")
-    datas.append((str(project_root / 'tools' / 'winpmem'), 'tools/winpmem'))
+    print(f"⚠ WinPmem not found - will generate instructions at runtime")
+    # 创建空目录结构
+    tools_dir = project_root / 'tools' / 'winpmem'
+    tools_dir.mkdir(parents=True, exist_ok=True)
+    datas.append((str(tools_dir), 'tools/winpmem'))
 
 readme_files = [
     'README.md',
-    'tools/README.md',
 ]
 
 for readme in readme_files:
     readme_path = project_root / readme
     if readme_path.exists():
-        parent = str(Path(readme).parent) if Path(readme).parent != Path('.') else '.'
-        datas.append((str(readme_path), parent))
+        datas.append((str(readme_path), '.'))
 
 print(f"\n📦 Data files to include: {len(datas)} items")
+
+block_cipher = None
 
 a = Analysis(
     ['src/main.py'],
@@ -46,8 +50,9 @@ a = Analysis(
         'sqlite3',
         'datetime',
         'time',
-        'enum',
-        'abc',
+        'platform',
+        'getpass',
+        'socket',
         'psutil',
         'src.modules.base_module',
         'src.modules.memory_module',
@@ -66,8 +71,8 @@ a = Analysis(
         'src.core.evidence_controller',
         'src.ui.main_window',
         'src.ui.widgets',
-        'src.ui.module_info',
         'src.ui.styles',
+        'src.ui.module_info',
     ],
     hookspath=[],
     hooksconfig={},
@@ -81,19 +86,17 @@ a = Analysis(
         'tkinter',
         'unittest',
         'test',
-        'xml',
-        'email',
-        'http',
-        'urllib',
     ],
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
+    cipher=block_cipher,
     noarchive=False,
 )
 
 pyz = PYZ(
     a.pure,
     a.zipped_data,
+    cipher=block_cipher
 )
 
 exe = EXE(
@@ -116,7 +119,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='resources/icon.ico',
+    icon=None,
     uac_admin=True,
     uac_uiaccess=False,
 )
@@ -125,6 +128,6 @@ print("\n" + "="*70)
 print("✓ PyInstaller configuration complete")
 print("="*70)
 print(f"Output: dist/WinScope.exe")
-print(f"Console: No (GUI Application)")
+print(f"Console: No (GUI application)")
 print(f"Admin privileges: Required")
 print("="*70 + "\n")
