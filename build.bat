@@ -30,7 +30,7 @@ echo.
 
 echo [4/5] Building executable...
 echo      This may take 2-3 minutes...
-pyinstaller winscope.spec
+pyinstaller build_exe.spec
 if errorlevel 1 (
     echo      ✗ Build failed!
     pause
